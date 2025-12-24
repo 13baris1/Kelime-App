@@ -1,0 +1,8 @@
+{
+  "name": "Kelime Çalışma",
+  "short_name": "Kelime",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f6ef7"
+}

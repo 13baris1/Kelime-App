@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f2f4fa;--card:#fff;--primary:#4f6ef7;
+  --success:#2e9e6f;--danger:#e5533d;
+  --muted:#6b7280;--border:#e5e7eb;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;font-family:Inter,sans-serif;background:var(--bg);
+  min-height:100vh;display:flex;justify-content:center;align-items:center
+}
+#frame{
+  width:100%;max-width:900px;min-height:100vh;background:var(--card);
+  border-radius:18px;padding:20px;
+  box-shadow:0 20px 45px rgba(0,0,0,.1);
+  display:grid;grid-template-rows:auto auto 1fr auto auto;gap:14px
+}
+.homeBlock{
+  max-width:520px;
+  margin:0 auto;
+}
+
+.homeBlock h2{
+  margin-top:18px;
+}
+
+#modeButtons{
+  display:grid;
+  grid-template-columns:repeat(3, 160px);
+  gap:12px;
+  justify-content:center;
+}
+
+#modeButtons button{
+  width:160px;
+  height:60px;
+  padding:0;
+  font-size:16px;
+  font-weight:600;
+  border-radius:16px;
+}
+
+button{
+  border:none;
+  border-radius:18px;
+  cursor:pointer;
+  padding:16px 20px;
+  font-size:18px;
+}
+
+.navControls button{
+  font-size:32px;
+  padding:18px 30px;
+}
+
+#mcArea button{
+  display:block;
+  width:100%;
+  margin:12px 0;
+  padding:20px;
+  font-size:20px;
+  font-weight:600;
+  border-radius:18px;
+}
+
+.center{text-align:center}
+h2{margin:8px 0}
+.nav{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:center;
+  gap:10px
+}
+#questionBox{display:flex;justify-content:center;align-items:center}
+#question{
+  font-size:clamp(26px,5vw,36px);
+  font-weight:700;
+  cursor:pointer
+}
+button:disabled{opacity:.5;cursor:not-allowed}
+.primary{
+  background:var(--primary);
+  color:#fff;
+}
+input,select{
+  width:100%;
+  padding:20px;
+  border-radius:16px;
+  border:1px solid var(--border);
+  font-size:20px;
+}
+
+/* Bölüm seçme listesi */
+#groupSelect{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  margin:10px 0 20px 0;
+  justify-content:center;
+}
+
+.correct{color:var(--success);font-weight:600}
+.wrong{color:var(--danger);font-weight:600}
+.info{color:var(--muted);margin-top:6px}
+#result{min-height:160px}
+#statsBar{
+  border-top:1px solid var(--border);
+  padding-top:10px;font-weight:600;
+  cursor:pointer
+}
+#statsDetail{
+  margin-top:10px;
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:10px;
+  font-size:14px
+}
+.statsCol b{display:block;margin-bottom:6px}
+.card{
+  background:#f7f8fd;border-radius:16px;padding:18px
+}
+#groupSelect button.primary{
+  background:#4f6ef7;
+  color:#ffffff;
+}
+
+#groupSelect button{
+  border:1px solid #d1d5db;
+}
+
+</style>
+<link rel="manifest" href="manifest.json">
+</head>
+
+<body>
+<div id="frame">
+
+<div id="home" class="center">
+  <div class="homeBlock">
+    <h2>Bölüm Seçme</h2>
+<div id="groupSelect"></div>
+   <h2>Çalışma Modu</h2>
+   <div id="mcTypeSelect" style="display:none;margin-bottom:10px">
+  <button class="primary" onclick="startMC('en-tr')">İngilizce → Türkçe</button>
+  <button class="primary" onclick="startMC('tr-en')">Türkçe → İngilizce</button>
+</div>
+
+<div id="modeButtons">
+  <button class="primary" onclick="start('scramble')">Harf Karıştırma</button>
+  <button class="primary" onclick="start('open')">Açık Uçlu</button>
+  <button class="primary" onclick="showMCType()">Çoktan Seçmeli</button>
+  <button class="primary" onclick="start('card')">Kelime Kartı</button>
+  <button class="primary" onclick="start('sentence')">Cümle Tamamlama</button>
+</div>
+
+
+
+  </div>
+</div>
+
+<div id="app" style="display:none">
+  <div class="nav">
+    <button onclick="goHome()">Ana Sayfa</button>
+    <div></div>
+  <div class="navControls">
+  <button onclick="prev()">⬅</button>
+  <button onclick="next()">➡</button>
+  <span id="speakBtnContainer"></span>
+</div>
+
+  </div>
+
+  <div id="questionBox">
+    <div id="question" onclick="speak()"></div>
+  </div>
+
+  <div id="openArea" style="display:none">
+    <input id="answerInput">
+    <div style="margin-top:10px">
+      <button class="primary" onclick="checkOpen()">Kontrol Et</button>
+      <button id="blankOpenBtn" onclick="blank()">Boş Bırak</button>
+    </div>
+  </div>
+
+  <div id="mcArea" style="display:none"></div>
+
+  <div id="mcControls" style="display:none;margin-top:10px">
+    <button class="primary" onclick="checkMC()">Kontrol Et</button>
+    <button id="blankMCBtn" onclick="blank()">Boş Bırak</button>
+  </div>
+
+  <div id="cardArea" style="display:none">
+    <div class="card">
+      <div class="info"><b>Anlamı:</b> <span id="cMeaning"></span></div>
+      <div class="info"><b>Eş Anlamlısı:</b> <span id="cSyn"></span></div>
+      <div class="info"><b>Zıt Anlamlısı:</b> <span id="cAnt"></span></div>
+    </div>
+  </div>
+
+  <div id="result"></div>
+  <button id="exampleBtn" onclick="toggleExamples()" style="display:none;margin-top:10px">
+  📖 Örnek Cümleleri Göster
+</button>
+
+<div id="exampleArea" class="card" style="display:none;margin-top:10px"></div>
+
+  <div id="statsBar" onclick="toggleStats()"></div>
+  <div id="statsDetail" style="display:none"></div>
+</div>
+
+</div>
+
+<script>
+let allWords=[],words=[],pool=[];
+let mode="",questions=[],qIndex=-1;
+let stats,correctCount,wrongCount,blankCount;
+let timer=null,enterLock=false,statsOpen=false;
+
+function resetStats(){
+  stats={correct:0,wrong:0,blank:0,total:0};
+  correctCount={};wrongCount={};blankCount={};
+  statsBar.innerText="";
+  statsDetail.innerHTML="";
+}
+
+google.script.run.withSuccessHandler(w=>{
+  allWords = w;
+  setTimeout(buildGroups, 0);
+}).getWords();
+
+
+function buildGroups(){
+  const container = document.getElementById("groupSelect");
+  container.innerHTML = "";
+  container.style.display = "flex";
+  container.style.flexWrap = "wrap";
+  container.style.gap = "8px";
+
+  const allBtn = document.createElement("button");
+  allBtn.innerText = "Tüm Kelimeler";
+  styleGroupButton(allBtn);
+  allBtn.dataset.value = "all";
+  allBtn.onclick = () => {
+    const selected = !allBtn.classList.contains("primary");
+    [...container.children].forEach(b => b.classList.remove("primary"));
+    if(selected) allBtn.classList.add("primary");
+  };
+  container.appendChild(allBtn);
+
+  for(let i=0;i<Math.ceil(allWords.length/20);i++){
+    const b = document.createElement("button");
+    b.innerText = `${i*20+1} - ${Math.min((i+1)*20,allWords.length)}`;
+    b.dataset.value = i;
+    styleGroupButton(b);
+    b.onclick = () => {
+      allBtn.classList.remove("primary");
+      b.classList.toggle("primary");
+    };
+    container.appendChild(b);
+  }
+}
+
+
+function styleGroupButton(b){
+b.style.padding = "16px";
+b.style.fontSize = "16px";
+b.style.borderRadius = "16px";
+b.style.width = "160px";
+b.style.height = "60px";
+
+  b.style.border = "1px solid #ccc";
+  b.style.backgroundColor = "#f7f8fd";
+b.style.color = "#1f2937";
+  b.style.cursor = "pointer";
+  b.style.userSelect = "none";
+b.onmouseenter = () => {
+  if(!b.classList.contains("primary")){
+    b.style.backgroundColor = "#eef2ff";
+  }
+};
+b.onmouseleave = () => {
+  if(!b.classList.contains("primary")){
+    b.style.backgroundColor = "#f7f8fd";
+  }
+};
+
+}
+
+
+let mcDirection = "en-tr";
+
+function showMCType(){
+  document.getElementById("mcTypeSelect").style.display = "block";
+}
+
+function startMC(dir){
+  mcDirection = dir;
+  document.getElementById("mcTypeSelect").style.display = "none";
+  start("mc");
+}
+
+function start(m){
+  resetStats();
+  mode=m;questions=[];qIndex=-1;
+const selected = [...document.querySelectorAll("#groupSelect button.primary")].map(b => b.dataset.value);
+
+// Tüm kelimeler seçiliyse
+if(selected.includes("all") || selected.length===0){
+  words=[...allWords];
+}else{
+  words=[];
+  selected.forEach(i=>{
+    i=parseInt(i);
+    words.push(...allWords.slice(i*20,i*20+20));
+  });
+}
+
+// Tüm kelimeler seçiliyse
+if(selected.includes("all") || selected.length===0){
+  words=[...allWords];
+}else{
+  words=[];
+  selected.forEach(i=>{
+    i=parseInt(i);
+    words.push(...allWords.slice(i*20,i*20+20));
+  });
+}
+
+  pool=[...words].sort(()=>Math.random()-0.5);
+  home.style.display="none";app.style.display="grid";
+  next();
+}
+
+function goHome(){
+  clearTimeout(timer);
+  app.style.display="none";
+  home.style.display="block";
+}
+
+function next(){
+  clearTimeout(timer);
+  enterLock=true;setTimeout(()=>enterLock=false,300);
+  if(mode==="card"){
+    if(qIndex<questions.length-1) qIndex++;
+    else{
+      if(pool.length===0) pool=[...words].sort(()=>Math.random()-0.5);
+      questions.push({word:pool.shift()});qIndex=questions.length-1;
+    }
+    load();return;
+  }
+  if(qIndex>=0&&!questions[qIndex].answered) return;
+  if(qIndex<questions.length-1){qIndex++;load();return;}
+  if(pool.length===0) pool=[...words].sort(()=>Math.random()-0.5);
+  const w=pool.shift();
+  questions.push({word:w,answered:false});
+  qIndex=questions.length-1;
+  load();
+}
+
+function prev(){if(qIndex>0){qIndex--;load()}}
+
+function load(){
+  const q=questions[qIndex],w=q.word;
+if(mode==="sentence"){
+  // G–W: İngilizce cümleler (16 adet)
+  // X–AL: Türkçe karşılıkları (16 adet)
+  const enStart = 5;   // G sütunu index
+  const trStart = 21; // X sütunu index
+
+  let pairs = [];
+
+  for(let i=0;i<16;i++){
+    const en = w[enStart + i];
+    const tr = w[trStart + i];
+    if(en && tr){
+      pairs.push({en,enTr:tr});
+    }
+  }
+
+  if(pairs.length === 0){
+    question.innerHTML = "<div style='color:red'>Bu kelime için cümle yok</div>";
+    return;
+  }
+
+  const chosen = pairs[0];
+  q.sentenceEN = chosen.en;
+  q.sentenceTR = chosen.enTr;
+  q.correctOption = w[0];
+
+
+ const word = w[0];
+const regex = new RegExp(`\\b${word}\\b`, "gi");
+let masked = q.sentenceEN.replace(regex, ".........");
+
+if(masked === q.sentenceEN){
+  masked = q.sentenceEN.replace(/\b\w+\b/, ".........");
+}
+
+
+
+  question.innerHTML = `<div style="text-align:center;font-size:22px">${masked}</div>`;
+}
+else{
+  if(mode==="mc" && mcDirection==="tr-en"){
+  question.innerHTML = w[1];
+}else{
+  question.innerHTML = `
+    ${w[0]}
+    <span style="font-size:14px;color:#6b7280"> (${w[2] || "-"})</span>
+  `;
+}
+
+}
+
+
+  blankOpenBtn && (blankOpenBtn.disabled=false);
+  blankMCBtn && (blankMCBtn.disabled=false);
+
+  openArea.style.display=mode==="open"?"block":"none";
+mcArea.style.display=(mode==="mc"||mode==="sentence")?"block":"none";
+mcControls.style.display=(mode==="mc"||mode==="sentence")?"block":"none";
+cardArea.style.display=mode==="card"?"block":"none";
+
+
+  if(mode==="open") answerInput.value=q.answer||"";
+if(mode==="mc"||mode==="sentence") buildMC(q);
+
+  if(mode==="card"){
+   cMeaning.innerText = w[1] || "-";   // Türkçe anlam
+cSyn.innerText     = w[3] || "-";   // Eş anlamlı
+cAnt.innerText     = w[4] || "-";   // Zıt anlamlı
+
+  }
+  if(mode==="scramble"){
+  const word = w[0];
+const chars = word.toUpperCase().split('').sort(() => Math.random() - 0.5);
+  question.innerHTML = `
+    <div style="text-align:center;font-size:24px;margin-bottom:12px">
+      ${w[1] || "-"}
+    </div>
+<div id="scrambleArea" style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap"></div>
+<div id="userInput" style="display:block; text-align:center; font-size:24px; margin-top:12px; min-height:30px"></div>
+    <div style="margin-top:12px;text-align:center">
+      <button class="primary" onclick="checkScramble()">Kontrol Et</button>
+<button onclick="blank()" style="margin-left:10px">Boş Bırak</button>
+    </div>
+  `;
+
+  const scrambleArea = document.getElementById("scrambleArea");
+const userInput = document.getElementById("userInput");
+userInput.innerHTML = ""; // Temizle
+
+const selectedLetters = []; // Kullanıcı seçilen harfler
+
+chars.forEach((c, i) => {
+  const b = document.createElement("button");
+  b.innerText = c;
+  b.style.padding = "16px";
+  b.style.fontSize = "20px";
+  b.style.borderRadius = "12px";
+  b.style.cursor = "pointer";
+  b.style.width = "50px";
+  b.style.height = "50px";
+  b.style.textAlign = "center";
+  b.style.userSelect = "none";
+
+  b.onclick = () => {
+    b.disabled = true;
+    const letterSpan = document.createElement("span");
+    letterSpan.innerText = c;
+    letterSpan.style.display = "inline-block";
+    letterSpan.style.width = "50px";
+    letterSpan.style.height = "50px";
+    letterSpan.style.margin = "4px";
+    letterSpan.style.textAlign = "center";
+    letterSpan.style.lineHeight = "50px";
+    letterSpan.style.fontSize = "20px";
+    letterSpan.style.border = "1px solid #ccc";
+    letterSpan.style.borderRadius = "8px";
+    letterSpan.style.cursor = "pointer";
+    letterSpan.style.backgroundColor = "#f7f8fd";
+    letterSpan.dataset.index = i;
+
+    selectedLetters.push({span: letterSpan, button: b});
+    userInput.appendChild(letterSpan);
+
+    // Geri alma
+    letterSpan.onclick = () => {
+      userInput.removeChild(letterSpan);
+      b.disabled = false;
+      const idx = selectedLetters.findIndex(x => x.span === letterSpan);
+      if(idx !== -1) selectedLetters.splice(idx, 1);
+    };
+  };
+
+  scrambleArea.appendChild(b);
+});
+
+}
+
+const exampleBtn = document.getElementById("exampleBtn");
+const exampleArea = document.getElementById("exampleArea");
+
+exampleArea.style.display = "none";
+
+if(mode !== "sentence" && mode !== "scramble"){
+  exampleBtn.style.display = "block";
+
+  exampleArea.innerHTML = `
+    <div><b>1.</b> ${w[5] || "-"}</div>
+    <div><b>2.</b> ${w[6] || "-"}</div>
+    <div><b>3.</b> ${w[7] || "-"}</div>
+  `;
+}else{
+  exampleBtn.style.display = "none";
+}
+
+
+
+  if(q.answered) renderResult(q); else result.innerHTML="";
+  updateStatsBar();
+// Seslendirme butonu görünürlüğü
+const speakBtnContainer = document.getElementById("speakBtnContainer");
+speakBtnContainer.innerHTML = "";
+if(
+  mode==="card" ||
+  mode==="open" ||
+  (mode==="mc" && mcDirection!=="tr-en")
+){
+  const btn = document.createElement("button");
+  btn.innerText = "🔊";
+  btn.onclick = speak;
+  speakBtnContainer.appendChild(btn);
+
+  if(!(mode==="mc" && mcDirection==="tr-en")){
+    setTimeout(speak, 500);
+  }
+}
+}
+
+function normalize(s){return s.toLowerCase().replace(/[ıİ]/g,"i")}
+function isClose(a,b){
+  a=normalize(a);b=normalize(b);
+  let d=0;
+  for(let i=0;i<Math.max(a.length,b.length);i++)
+    if(a[i]!==b[i]) d++;
+  return d<=2;
+}
+
+function buildMC(q){
+  mcArea.innerHTML="";
+
+  if(mode==="sentence"){
+    if(!q.correctOption) q.correctOption=q.word[0];
+  }else{
+   if(mcDirection==="en-tr"){
+  const meanings=q.word[1].split(",").map(x=>x.trim());
+  if(!q.correctOption) q.correctOption=meanings[0];
+}else{
+  if(!q.correctOption) q.correctOption=q.word[0];
+}
+
+  }
+
+ let opts = [q.correctOption];
+const sameTypeWords = allWords.filter(w2 => w2[2] === q.word[2]);
+
+while (opts.length < 5) {
+  const w2 = sameTypeWords[Math.floor(Math.random() * sameTypeWords.length)];
+let val;
+if(mode==="sentence") val = w2[0];
+else if(mcDirection==="en-tr") val = w2[1].split(",")[0].trim();
+else val = w2[0];
+  if(!opts.includes(val)) opts.push(val);
+}
+
+  opts.sort(()=>Math.random()-0.5);
+
+  opts.forEach(o=>{
+    let b=document.createElement("button");
+    b.innerText=o;
+    b.onclick=()=>{
+  if(q.answered)return;
+  q.selected=o;
+  [...mcArea.children].forEach(x=>x.classList.remove("primary"));
+  b.classList.add("primary");
+  checkMC(); // 👈 otomatik kontrol
+};
+
+    mcArea.appendChild(b);
+  });
+}
+
+function checkMC(){
+  const q=questions[qIndex];
+  if(q.answered||!q.selected) return;
+  save(q,q.selected===q.correctOption);
+}
+
+function checkOpen(){
+  const q=questions[qIndex];
+  if(q.answered)return;
+  const val=answerInput.value.trim();
+  q.answer=val;
+  if(!val){blank();return;}
+  const truths=q.word[1].split(",").map(s=>s.trim());
+  save(q,truths.some(t=>isClose(t,val)));
+}
+
+function blank(){
+  const q=questions[qIndex];
+  if(q.answered) return;
+  blankOpenBtn && (blankOpenBtn.disabled=true);
+  blankMCBtn && (blankMCBtn.disabled=true);
+  save(q,null);
+}
+
+function save(q,ok){
+  q.answered=true;q.ok=ok;
+  stats.total++;
+  const key=q.word[0];
+  if(ok===true){stats.correct++;correctCount[key]=(correctCount[key]||0)+1}
+  else if(ok===false){stats.wrong++;wrongCount[key]=(wrongCount[key]||0)+1}
+  else{stats.blank++;blankCount[key]=(blankCount[key]||0)+1}
+  renderResult(q);updateStatsBar();
+  timer=setTimeout(()=>{if(qIndex===questions.length-1)next()},8000);
+}
+
+
+
+  function renderResult(q){
+
+  let html = "";
+
+ if(mode==="sentence"){
+
+  if(q.ok===true){
+    html += `<div class="correct">Doğru: ${q.word[0]}</div>`;
+    if(q.word[3]){
+      html += `<div>Eş anlamlıları: ${q.word[3]}</div>`;
+    }
+  }
+  else{
+    html += `<div class="wrong">Yanlış!</div>`;
+    html += `<div>Doğrusu: ${q.word[0]}</div>`;
+  }
+
+ }
+ else{
+
+  if(q.ok===true){
+    html += `<div class="correct">Doğru: ${q.word[1]}</div>`;
+    if(q.word[3]){
+      html += `<div>Eş anlamlıları: ${q.word[3]}</div>`;
+    }
+  }
+  else if(q.ok===false){
+    html += `<div class="wrong">Yanlış!</div>`;
+    html += `<div>Doğrusu: ${q.word[1]}</div>`;
+    if(q.word[3]){
+      html += `<div>Eş anlamlıları: ${q.word[3]}</div>`;
+    }
+  }
+  else{
+    html += `<div class="wrong">Boş</div>`;
+    html += `<div>Doğrusu: ${q.word[1]}</div>`;
+    if(q.word[3]){
+      html += `<div>Eş anlamlıları: ${q.word[3]}</div>`;
+    }
+  }
+
+
+ }
+
+
+
+
+if(mode==="sentence"){
+  html += `
+    
+    <div class="info" style="margin-top:6px">
+      <b>Cümlenin Türkçesi:</b><br>${q.sentenceTR}
+    </div>
+  `;
+}
+if(mode==="scramble"){
+  if(q.ok===true) html = `<div class="correct">Doğru: ${q.word[0]}</div>`;
+  else if(q.ok===false) html = `<div class="wrong">Yanlış!</div><div>Doğrusu: ${q.word[0]}</div>`;
+  else html = `<div class="wrong">Boş</div><div>Doğrusu: ${q.word[0]}</div>`;
+}
+
+
+
+  result.innerHTML = html;
+}
+
+
+
+
+function updateStatsBar(){
+  if(mode==="card"){statsBar.innerText=`Gösterilen Kart: ${qIndex+1}`;return;}
+  const p=stats.total?Math.round(stats.correct/stats.total*100):0;
+  statsBar.innerText=`Doğru: ${stats.correct} | Yanlış: ${stats.wrong} | Boş: ${stats.blank} | Toplam: ${stats.total} | %${p}`;
+}
+
+function toggleStats(){
+  if(mode==="card") return;
+  statsOpen=!statsOpen;
+  statsDetail.style.display=statsOpen?"grid":"none";
+  if(!statsOpen) return;
+  statsDetail.innerHTML=`
+    <div class="statsCol"><b>Doğrular</b>${Object.keys(correctCount).map(k=>`${k} (${correctCount[k]})`).join("<br>")}</div>
+    <div class="statsCol"><b>Yanlışlar</b>${Object.keys(wrongCount).map(k=>`${k} (${wrongCount[k]})`).join("<br>")}</div>
+    <div class="statsCol"><b>Boşlar</b>${Object.keys(blankCount).map(k=>`${k} (${blankCount[k]})`).join("<br>")}</div>
+  `;
+}
+
+function speak(){
+  if(
+  mode==="sentence" ||
+  mode==="scramble" ||
+  (mode==="mc" && mcDirection==="tr-en")
+) return;
+
+  const q=questions[qIndex];if(!q)return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(q.word[0]);
+  u.lang="en-US";speechSynthesis.speak(u);
+}
+
+
+document.addEventListener("keydown", e=>{
+  if(enterLock) return;
+  const q=questions[qIndex];
+
+  if(mode==="card"){
+    if(e.key==="ArrowRight"||e.key==="Enter") next();
+    if(e.key==="ArrowLeft") prev();
+    return;
+  }
+
+  if(e.key==="Enter"){
+    if(!q || q.answered){
+      next();
+      return;
+    }
+
+    if(mode==="open") checkOpen();
+    if(mode==="mc") checkMC();
+    if(mode==="scramble") checkScramble();  // 👈 burayı ekledik
+  }
+});
+
+
+function toggleExamples(){
+  const q = questions[qIndex];
+  if(!q) return;
+
+  const box = document.getElementById("exampleArea");
+  box.style.display = box.style.display === "none" ? "block" : "none";
+}
+function checkScramble(){
+  const q = questions[qIndex];
+  if(q.answered) return;
+  const userInput = document.getElementById("userInput");
+  const val = userInput ? userInput.innerText : "";
+  q.answer = val;
+save(q, val.toLowerCase() === q.word[0].toLowerCase());
+}
+
+</script>
+</body>
+</html>
