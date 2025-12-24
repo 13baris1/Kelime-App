@@ -430,13 +430,15 @@ else{
   blankMCBtn && (blankMCBtn.disabled=false);
 
   openArea.style.display=mode==="open"?"block":"none";
-mcArea.style.display=(mode==="mc"||mode==="sentence")?"block":"none";
-mcControls.style.display=(mode==="mc"||mode==="sentence")?"block":"none";
+mcArea.style.display = mode==="mc" ? "block" : "none";
+mcControls.style.display = mode==="mc" ? "block" : "none";
+
 cardArea.style.display=mode==="card"?"block":"none";
 
 
   if(mode==="open") answerInput.value=q.answer||"";
-if(mode==="mc"||mode==="sentence") buildMC(q);
+if(mode==="mc") buildMC(q);
+
 
   if(mode==="card"){
    cMeaning.innerText = w[1] || "-";   // Türkçe anlam
@@ -597,7 +599,7 @@ else val = w2[0];
   q.selected=o;
   [...mcArea.children].forEach(x=>x.classList.remove("primary"));
   b.classList.add("primary");
-  checkMC(); // 👈 otomatik kontrol
+  
 };
 
     mcArea.appendChild(b);
@@ -606,7 +608,8 @@ else val = w2[0];
 
 function checkMC(){
   const q=questions[qIndex];
-  if(q.answered||!q.selected) return;
+  if(q.answered) return;
+
   save(q,q.selected===q.correctOption);
 }
 
@@ -786,6 +789,7 @@ save(q, val.toLowerCase() === q.word[1].toLowerCase());
   
 </body>
 </html>
+
 
 
 
