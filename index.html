@@ -304,13 +304,17 @@ let mcDirection = "en-tr";
 
 function showMCType(){
   document.getElementById("mcTypeSelect").style.display = "block";
+  document.getElementById("modeButtons").style.display = "none";
 }
+
 
 function startMC(dir){
   mcDirection = dir;
   document.getElementById("mcTypeSelect").style.display = "none";
+  document.getElementById("modeButtons").style.display = "grid";
   start("mc");
 }
+
 
 function start(m){
   resetStats();
@@ -430,14 +434,16 @@ else{
   blankMCBtn && (blankMCBtn.disabled=false);
 
   openArea.style.display=mode==="open"?"block":"none";
-mcArea.style.display = mode==="mc" ? "block" : "none";
-mcControls.style.display = mode==="mc" ? "block" : "none";
+mcArea.style.display = (mode==="mc" || mode==="sentence") ? "block" : "none";
+mcControls.style.display = (mode==="mc" || mode==="sentence") ? "block" : "none";
+
 
 cardArea.style.display=mode==="card"?"block":"none";
 
 
   if(mode==="open") answerInput.value=q.answer||"";
-if(mode==="mc") buildMC(q);
+if(mode==="mc" || mode==="sentence") buildMC(q);
+
 
 
   if(mode==="card"){
@@ -566,7 +572,9 @@ function buildMC(q){
   mcArea.innerHTML="";
 
   if(mode==="sentence"){
-    if(!q.correctOption) q.correctOption=q.word[1];
+  q.correctOption = q.word[1];
+}
+
   }else{
    if(mcDirection==="en-tr"){
   const meanings=q.word[1].split(",").map(x=>x.trim());
@@ -789,6 +797,7 @@ save(q, val.toLowerCase() === q.word[1].toLowerCase());
   
 </body>
 </html>
+
 
 
 
