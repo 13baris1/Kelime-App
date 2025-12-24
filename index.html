@@ -401,7 +401,7 @@ if(mode==="sentence"){
   q.correctOption = w[0];
 
 
- const word = w[0];
+ const word = w[1];
 const regex = new RegExp(`\\b${word}\\b`, "gi");
 let masked = q.sentenceEN.replace(regex, ".........");
 
@@ -418,7 +418,7 @@ else{
   question.innerHTML = w[1];
 }else{
   question.innerHTML = `
-    ${w[0]}
+    ${w[1]}
     <span style="font-size:14px;color:#6b7280"> (${w[2] || "-"})</span>
   `;
 }
@@ -445,7 +445,7 @@ cAnt.innerText     = w[4] || "-";   // Zıt anlamlı
 
   }
   if(mode==="scramble"){
-  const word = w[0];
+  const word = w[1];
 const chars = word.toUpperCase().split('').sort(() => Math.random() - 0.5);
   question.innerHTML = `
     <div style="text-align:center;font-size:24px;margin-bottom:12px">
@@ -564,7 +564,7 @@ function buildMC(q){
   mcArea.innerHTML="";
 
   if(mode==="sentence"){
-    if(!q.correctOption) q.correctOption=q.word[0];
+    if(!q.correctOption) q.correctOption=q.word[1];
   }else{
    if(mcDirection==="en-tr"){
   const meanings=q.word[1].split(",").map(x=>x.trim());
@@ -648,14 +648,14 @@ function save(q,ok){
  if(mode==="sentence"){
 
   if(q.ok===true){
-    html += `<div class="correct">Doğru: ${q.word[0]}</div>`;
+    html += `<div class="correct">Doğru: ${q.word[1]}</div>`;
     if(q.word[3]){
       html += `<div>Eş anlamlıları: ${q.word[3]}</div>`;
     }
   }
   else{
     html += `<div class="wrong">Yanlış!</div>`;
-    html += `<div>Doğrusu: ${q.word[0]}</div>`;
+    html += `<div>Doğrusu: ${q.word[1]}</div>`;
   }
 
  }
@@ -737,7 +737,7 @@ function speak(){
 
   const q=questions[qIndex];if(!q)return;
   speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(q.word[0]);
+  const u=new SpeechSynthesisUtterance(q.word[1]);
   u.lang="en-US";speechSynthesis.speak(u);
 }
 
@@ -778,13 +778,15 @@ function checkScramble(){
   const userInput = document.getElementById("userInput");
   const val = userInput ? userInput.innerText : "";
   q.answer = val;
-save(q, val.toLowerCase() === q.word[0].toLowerCase());
+save(q, val.toLowerCase() === q.word[1].toLowerCase());
+
 }
 
 </script>
   
 </body>
 </html>
+
 
 
 
