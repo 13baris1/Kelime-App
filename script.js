@@ -22,3 +22,4 @@ function selectSection(id) {
   event.target.classList.add("active");
   window.selectedSection = id;
 }
+
