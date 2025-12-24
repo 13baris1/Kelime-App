@@ -230,40 +230,15 @@ function resetStats(){
   statsDetail.innerHTML="";
 }
 
-allWords = [
-  ["apple","elma","noun"],
-  ["book","kitap","noun"],
-  ["car","araba","noun"],
-  ["house","ev","noun"],
-  ["water","su","noun"],
-  ["sun","güneş","noun"],
-  ["moon","ay","noun"],
-  ["tree","ağaç","noun"],
-  ["road","yol","noun"],
-  ["child","çocuk","noun"],
-  ["city","şehir","noun"],
-  ["school","okul","noun"],
-  ["food","yemek","noun"],
-  ["friend","arkadaş","noun"],
-  ["family","aile","noun"],
-  ["money","para","noun"],
-  ["time","zaman","noun"],
-  ["work","iş","noun"],
-  ["life","hayat","noun"],
-  ["world","dünya","noun"],
-  ["music","müzik","noun"],
-  ["movie","film","noun"],
-  ["game","oyun","noun"],
-  ["phone","telefon","noun"],
-  ["computer","bilgisayar","noun"],
-  ["table","masa","noun"],
-  ["chair","sandalye","noun"],
-  ["door","kapı","noun"],
-  ["window","pencere","noun"],
-  ["street","sokak","noun"]
-];
-
-buildGroups();
+fetch("kelimeler.csv")
+  .then(r => r.text())
+  .then(t => {
+    allWords = t
+      .trim()
+      .split("\n")
+      .map(row => row.split(","));
+    buildGroups();
+  });
 ;
 
 
@@ -810,6 +785,7 @@ save(q, val.toLowerCase() === q.word[0].toLowerCase());
   
 </body>
 </html>
+
 
 
 
